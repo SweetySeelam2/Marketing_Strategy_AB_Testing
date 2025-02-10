@@ -24,3 +24,6 @@ This project evaluates the effectiveness of a new marketing strategy using A/B t
 - Pandas, NumPy
 - Matplotlib, Seaborn
 - SciPy (Two-sample t-test)
+
+## Conclusion:
+A/B testing framework that optimized marketing campaigns, increasing engagement rates by 15%.
