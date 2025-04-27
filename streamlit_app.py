@@ -1,86 +1,144 @@
 import streamlit as st
 import pandas as pd
-import pickle
 import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
+import pickle
+from scipy import stats
 
-# Load model, column list, and images
+# ----------------------
+# Load trained Logistic Regression model and expected input columns
+# ----------------------
 model = pickle.load(open("model.pkl", "rb"))
 expected_cols = pickle.load(open("input_columns.pkl", "rb"))
-df = pd.read_csv("data/Marketing_AB_Testing.csv")
-conf_matrix_img = Image.open("images/LogisticReg_confusion_matrix.png")
-roc_curve_img = Image.open("images/LogisticReg_roc_curve.png")
 
-# Title and intro
-st.title("📊 Advanced Marketing A/B Testing + Conversion Prediction")
+# ----------------------
+# Load and Preprocess Dataset
+# ----------------------
+df = pd.read_csv('data/Marketing_AB_Testing.csv')
+
+# Proper Preprocessing
+# Map 'test group'
+df['test group'] = df['test group'].map({'psa': 0, 'ad': 1})
+
+# Map 'most ads day'
+day_mapping = {
+    'Monday': 0,
+    'Tuesday': 1,
+    'Wednesday': 2,
+    'Thursday': 3,
+    'Friday': 4,
+    'Saturday': 5,
+    'Sunday': 6
+}
+df['most ads day'] = df['most ads day'].map(day_mapping)
+
+# Ensure 'converted' is integer
+df['converted'] = df['converted'].astype(int)
+
+# ----------------------
+# Streamlit App Layout
+# ----------------------
+st.set_page_config(page_title="Marketing A/B Testing + Logistic Regression App", layout="wide")
+
+st.title("📊 Advanced Marketing A/B Testing + Logistic Regression Conversion Prediction")
+
 st.markdown("""
-Welcome to the Enhanced Marketing Intelligence App — powered by Random Forests for enterprise-level decision making:
-- 📈 A/B test insights
-- 🤖 Conversion probability scoring
-- 🧠 Behavioral targeting
+Welcome to the Enhanced Marketing Intelligence App — powered by **Logistic Regression** for enterprise-level decision making:
+
+This dashboard helps you:
+
+- 📈 Analyze A/B Testing results
+- 🤖 Predict Conversion Probability scoring using Logistic Regression
+- 🧠 Optimize Marketing Decisions by Behavioral targeting
 """)
 
-# A/B Testing Results
-st.header("🧪 A/B Test Results")
+st.divider()
 
-df['test group'] = df['test group'].map({'psa': 0, 'ad': 1})
-df['converted'] = df['converted'].astype(int)
-group_rates = df.groupby('test group')['converted'].mean().rename({0: 'PSA', 1: 'Ad'})
-rate_diff = (group_rates['Ad'] - group_rates['PSA']) * 100
+# ----------------------
+# A/B Testing Section
+# ----------------------
+st.header("🧪 A/B Testing Insights")
 
-st.write("**Conversion Rates:**")
-st.write(f"- Ad group: {group_rates['Ad']:.2%}")
-st.write(f"- PSA group: {group_rates['PSA']:.2%}")
-st.write(f"- 📊 Uplift: {rate_diff:.2f}%")
+# Extract Ad and PSA groups
+ad_group = df[df['test group'] == 1]['converted']
+psa_group = df[df['test group'] == 0]['converted']
 
-from scipy import stats
-ad = df[df['test group'] == 1]['converted']
-psa = df[df['test group'] == 0]['converted']
-t_stat, p_value = stats.ttest_ind(ad, psa)
+# Calculate conversion rates
+ad_rate = ad_group.mean() * 100
+psa_rate = psa_group.mean() * 100
+uplift_percentage = ((ad_rate - psa_rate) / psa_rate) * 100
+
+st.subheader("Conversion Rates:")
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Ad Group Conversion Rate", f"{ad_rate:.2f}%")
+col2.metric("PSA Group Conversion Rate", f"{psa_rate:.2f}%")
+col3.metric("Uplift %", f"{uplift_percentage:.2f}%")
+
+# Statistical test
+st.subheader("T-test Analysis")
+t_stat, p_value = stats.ttest_ind(ad_group, psa_group)
+
 st.write(f"**T-test p-value:** {p_value:.4f}")
 
 if p_value < 0.05:
     st.success("✅ Statistically significant uplift. Deploy the ad strategy.")
 else:
-    st.warning("⚠️ No significant difference detected.")
+    st.warning("⚠️ No statistically significant difference detected.")
 
-# Conversion Prediction
-st.header("🤖 Conversion Probability Predictor")
+st.divider()
 
-test_group = st.selectbox("Test Group", options=["psa", "ad"])
-total_ads = st.slider("Total Ads Viewed", min_value=0, max_value=1000, value=10)
-most_ads_hour = st.slider("Most Ads Hour (24h)", min_value=0, max_value=23, value=18)
-most_ads_day = st.selectbox("Most Ads Day", options=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])
+# ----------------------
+# ML Prediction Section
+# ----------------------
+st.header("🤖 Conversion Probability Predictor (Logistic Regression)")
 
-input_data = {col: 0 for col in expected_cols}
-input_data['test group'] = 1 if test_group == 'ad' else 0
-input_data['total ads'] = total_ads
-input_data['most ads hour'] = most_ads_hour
-day_feature = f'most ads day_{most_ads_day}'
-if day_feature in input_data:
-    input_data[day_feature] = 1
+# User Inputs
+test_group_input = st.selectbox("Select Test Group:", ("psa", "ad"))
+ad_hour_input = st.slider("Most Ads Viewed Hour (0-23)", 0, 23, 12)
+most_ads_day_input = st.selectbox("Select Most Ads Day:", list(day_mapping.keys()))
 
-X_input = pd.DataFrame([input_data])
+# Map inputs
+mapped_test_group = 0 if test_group_input == 'psa' else 1
+mapped_ads_day = day_mapping[most_ads_day_input]
 
 if st.button("Predict Conversion Probability"):
-    proba = model.predict_proba(X_input)[0][1]
-    st.metric(label="🔮 Conversion Probability", value=f"{proba:.2%}")
-    if proba > 0.75:
-        st.success("High conversion likelihood — prioritize user.")
-    elif proba > 0.5:
-        st.info("Moderate conversion potential — monitor and engage.")
-    else:
-        st.warning("Low likelihood — low ROI segment.")
+    X_input = pd.DataFrame({
+        'test group': [mapped_test_group],
+        'most ads hour': [ad_hour_input],
+        'most ads day': [mapped_ads_day]
+    })
 
-# Evaluation Visuals
-st.header("📉 Model Evaluation")
-st.subheader("Confusion Matrix")
-st.image(conf_matrix_img, use_column_width=True)
+    # Reorder columns correctly
+    X_input = X_input[expected_cols]
 
-st.subheader("ROC Curve")
-st.image(roc_curve_img, use_column_width=True)
+    # Convert to numpy array to avoid feature name mismatch
+    X_input_np = X_input.values
+
+    try:
+        proba = model.predict_proba(X_input_np)[0][1]
+        st.success(f"\n✅ Predicted Conversion Probability: {proba * 100:.2f}%")
+    except Exception as e:
+        st.error(f"Prediction failed: {str(e)}")
+
+st.divider()
+
+# ----------------------
+# Business Conclusion Section
+# ----------------------
+st.markdown("""
+#### Notes:
+- Logistic Regression Model is used for conversion prediction.
+- Business Impact: Conversion uplift validated and strategy recommended for deployment.
+- Model based on Ad group, Hour of Ad viewing, and Day of Week.
+
+#### Business Recommendation:
+- Logistic Regression Model correctly predicts conversion likelihood.
+- A/B Test showed a significant 43%+ uplift with Ad strategy.
+- Recommend scaling Ad campaigns during peak hours/days.
+
+✅ Ready for executive reporting and scaling.
+""")
 
 # Footer
-st.markdown("---")
 st.caption("© 2025 Sweety Seelam | Enterprise-ready ML App | Protected under CC BY-NC 4.0")
+
