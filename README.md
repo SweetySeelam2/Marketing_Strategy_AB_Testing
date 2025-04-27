@@ -3,7 +3,7 @@
 
 ---
 
-# Marketing Strategy A/B Testing + Conversion Prediction (ML - Logsitic Regression model)
+# Marketing Strategy A/B Testing + Conversion Prediction (ML - Logistic Regression model)
 
 ---
 
