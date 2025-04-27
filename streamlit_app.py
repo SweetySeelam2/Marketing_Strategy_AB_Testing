@@ -9,8 +9,8 @@ from PIL import Image
 model = pickle.load(open("model.pkl", "rb"))
 expected_cols = pickle.load(open("input_columns.pkl", "rb"))
 df = pd.read_csv("data/Marketing_AB_Testing.csv")
-conf_matrix_img = Image.open("images/confusion_matrix.png")
-roc_curve_img = Image.open("images/roc_curve.png")
+conf_matrix_img = Image.open("images/LogisticReg_confusion_matrix.png")
+roc_curve_img = Image.open("images/LogisticReg_roc_curve.png")
 
 # Title and intro
 st.title("📊 Advanced Marketing A/B Testing + Conversion Prediction")
@@ -51,7 +51,7 @@ st.header("🤖 Conversion Probability Predictor")
 test_group = st.selectbox("Test Group", options=["psa", "ad"])
 total_ads = st.slider("Total Ads Viewed", min_value=0, max_value=1000, value=10)
 most_ads_hour = st.slider("Most Ads Hour (24h)", min_value=0, max_value=23, value=18)
-most_ads_day = st.selectbox("Most Ads Day", options=['Monday','Tuesday','Wednesday','Thursday','Saturday','Sunday'])
+most_ads_day = st.selectbox("Most Ads Day", options=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])
 
 input_data = {col: 0 for col in expected_cols}
 input_data['test group'] = 1 if test_group == 'ad' else 0
