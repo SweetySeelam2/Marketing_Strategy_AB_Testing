@@ -39,22 +39,22 @@ Deployed as a fully interactive **Streamlit Dashboard**.
 
 AB_testing+ML_Prediction/ 
 
-├── streamlit_app.py 
-├── train_model.py 
-├── Marketing_AB_Testing.ipynb 
-├── data/ 
-│ └── Marketing_AB_Testing.csv 
-├── images/ 
-│ ├── AB Testing Groups plot.png 
-│ ├── Conversion_by_hour&Conversion_by_day.png 
-│ ├── LogisticReg_confusion_matrix.png 
-│ ├── LogisticReg_roc_curve.png 
-│ └── LogisticReg_classification_report.png 
-├── model.pkl 
-├── input_columns.pkl 
-├── README.md 
-├── requirements.txt 
-├── LICENSE
+├── streamlit_app.py                                                           
+├── train_model.py                                                                                      
+├── Marketing_AB_Testing.ipynb                                                                                  
+├── data/                                                                                                                  
+│ └── Marketing_AB_Testing.csv                                                                                                       
+├── images/                                                                                                                           
+│ ├── AB Testing Groups plot.png                                                                                                                      
+│ ├── Conversion_by_hour&Conversion_by_day.png                                                                                                              
+│ ├── LogisticReg_confusion_matrix.png                                                                                                           
+│ ├── LogisticReg_roc_curve.png                                                                                                               
+│ └── LogisticReg_classification_report.png                                                                                                  
+├── model.pkl                                                                                                                                     
+├── input_columns.pkl                                                                                                                                    
+├── README.md                                                                                                                                                   
+├── requirements.txt                                                                                                                      
+├── LICENSE                                         
 
 ---
 
