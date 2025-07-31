@@ -130,12 +130,6 @@ My Portfolio: https://sweetyseelam2.github.io/SweetySeelam.github.io/
 
 ---
 
-## 🏆 My Contribution at Amazon
-
-At Amazon, I led this conversion uplift analysis using A/B testing and machine learning. My analysis helped unlock a 43.09% conversion uplift, saving ~$2.1M/year in ad waste and improving campaign ROI across multiple business units. The success was featured in our Quarterly Business Review and adopted across Prime Video, Kindle, and Fresh.
-
----
-
 ## 🔒 Proprietary & All Rights Reserved
 
 © 2025 Sweety Seelam. This work is proprietary and protected by copyright. All content, models, code, and visuals are © 2025 Sweety Seelam. No part of this project, app, code, or analysis may be copied, reproduced, distributed, or used for any purpose—commercial or otherwise—without explicit written permission from the author.
